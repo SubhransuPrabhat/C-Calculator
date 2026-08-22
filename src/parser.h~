@@ -1,6 +1,0 @@
-#ifndef PARSER_H
-#define PARSER_H
-
-double parser(Token tokens[]);
-
-#endif //PARSER_H

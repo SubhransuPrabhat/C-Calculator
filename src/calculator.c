@@ -1,14 +1,13 @@
 #include <stdio.h>
 #include "parser.h"
-#define MAX 50
 
-int main(void){
-    char exp[MAX];
+int main(int argc,char *argv[]){
+    if(argc!=2){
+        printf("Usage: %s <expression>",argv[0]);
+        return 1;
+    }
 
-    printf("Enter expression:");
-    fgets(exp,MAX,stdin);
-
-    double result = parser(exp);
-    printf("Result:%f",result);
+    double result = parser(argv[1]);
+    printf("%f",result);
     return 0;
 }
