@@ -9,12 +9,13 @@ typedef enum{
     TOK_SLASH,
     TOK_POWER,
     TOK_LPARAN,
-    TOK_RPARAN
+    TOK_RPARAN,
+    TOK_UNARY_MINUS
 } Tokentype;
 
 typedef struct{
     Tokentype type;
-    int value;
+    double value;
 }Token;
 
 int token_conversion(const char *exp,Token tokens[]);

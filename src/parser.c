@@ -32,6 +32,7 @@ int precedence(Tokentype op){
     case TOK_STAR :
     case TOK_SLASH :return 2;
     case TOK_POWER :return 3;
+    case TOK_UNARY_MINUS :return 4;
     default : return 0;
     }
 }
@@ -42,7 +43,7 @@ double apply_op(double a,double b,Tokentype op){
     case TOK_MINUS : return a-b;
     case TOK_STAR : return a*b;
     case TOK_SLASH : return a/b;
-   // case TOK_POWER : return pow(a,b);
+    case TOK_POWER : return pow(a,b);
     }
 }
 
@@ -66,15 +67,21 @@ double parser(const char *exp){
             break;
         case TOK_RPARAN:
             while(op_stack.top!=-1 && peek_op(&op_stack)!=TOK_LPARAN){
-                double num2 = pop_num(&num_stack);
-                double num1 = pop_num(&num_stack);
                 Tokentype op = pop_op(&op_stack);
-                push_num(&num_stack,apply_op(num1,num2,op));
+                if(op==TOK_UNARY_MINUS){
+                    double a = pop_num(&num_stack);
+                    push_num(&num_stack,-a);
+                }else{
+                    double num2 = pop_num(&num_stack);
+                    double num1 = pop_num(&num_stack);
+                    push_num(&num_stack,apply_op(num1,num2,op));
+                }
             }
             pop_op(&op_stack);
             break;
         case TOK_PLUS :
         case TOK_MINUS :
+        case TOK_UNARY_MINUS :
         case TOK_STAR :
         case TOK_SLASH :
         case TOK_POWER :
@@ -83,15 +90,19 @@ double parser(const char *exp){
                 int curr_prec = precedence(t.type);
 
                 if(top_prec >= curr_prec && t.type != TOK_POWER){
-                    double num2 = pop_num(&num_stack);
-                    double num1 = pop_num(&num_stack);
                     Tokentype op = pop_op(&op_stack);
-                    push_num(&num_stack,apply_op(num1,num2,op));
+                    if(op==TOK_UNARY_MINUS){
+                        double a = pop_num(&num_stack);
+                        push_num(&num_stack,-a);
+                    }else{
+                        double num2 = pop_num(&num_stack);
+                        double num1 = pop_num(&num_stack);
+                        push_num(&num_stack,apply_op(num1,num2,op));
+                    }
                 }
                 else{
                     break;
                 }
-               
             }
              push_op(&op_stack,t.type);
              break;
