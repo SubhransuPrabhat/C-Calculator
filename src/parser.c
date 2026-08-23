@@ -109,10 +109,15 @@ double parser(const char *exp){
         }
     }
     while(op_stack.top!=-1){
-        double num2 = pop_num(&num_stack);
-        double num1 = pop_num(&num_stack);
         Tokentype op = pop_op(&op_stack);
-        push_num(&num_stack,apply_op(num1,num2,op));
+        if(op==TOK_UNARY_MINUS){
+            double a = pop_num(&num_stack);
+            push_num(&num_stack,-a);
+        }else{
+            double num2 = pop_num(&num_stack);
+            double num1 = pop_num(&num_stack);
+            push_num(&num_stack,apply_op(num1,num2,op));
+        }
     }
     return pop_num(&num_stack);
 }

@@ -1,5 +1,6 @@
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 #include "lexer.h"
 
 char isOperator(char c){
@@ -23,11 +24,9 @@ int token_conversion(const char *exp,Token tokens[]){
             continue;
         }
         if(isdigit(exp[i])){
-            int num=0;
-            while(isdigit(exp[i])){
-                int temp=exp[i++] - '0';
-                num=num*10+temp;                
-            }
+            char *endptr;
+            double num = strtod(exp+i,&endptr);
+            i += (endptr-(exp+i));
             tokens[j++]=(Token){TOK_NUM,num};
             continue;
         }
