@@ -6,6 +6,13 @@ int main(int argc,char *argv[]){
         printf("Usage: %s <expression>",argv[0]);
         return 1;
     }
-    double result = calculate(argv[1]);
-    printf("%f",result);
+    
+    Result result = calculate(argv[1]);
+
+    if(result.Error != NO_ERROR){
+        print_error(result.Error);
+        return 1;
+    }
+    
+    printf("%f",result.value);
 }

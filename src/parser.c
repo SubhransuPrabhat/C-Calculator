@@ -1,6 +1,8 @@
 #include <math.h>
+#include <stdlib.h>
 #include "parser.h"
 #include "lexer.h"
+#include "error.h"
 #define MAX 50
 
 typedef struct{
@@ -12,6 +14,11 @@ typedef struct{
     Tokentype data[MAX];
     int top;
 }OpStack;
+
+typedef enum{
+    EXPECT_OPERAND,
+    EXPECT_OPERATOR
+}ParserState;
 
 //Operand stack
 void init_num_stack(NumStack *s){s->top=-1;}
@@ -44,23 +51,34 @@ double apply_op(double a,double b,Tokentype op){
     case TOK_STAR : return a*b;
     case TOK_SLASH : return a/b;
     case TOK_POWER : return pow(a,b);
+    default : return 0;
     }
 }
 
 
-double parser(const char *exp){
+Result parser(const char *exp){
     Token tokens[MAX];
     int token_count=token_conversion(exp,tokens);
+
+    if(token_count<0){
+        return (Result){0,INVALID_CHARACTER};
+    }
 
     NumStack num_stack; init_num_stack(&num_stack);
     OpStack op_stack; init_op_stack(&op_stack);
 
+    ParserState next = EXPECT_OPERAND;
+    
     for(int i=0;i<token_count;i++){
         Token t = tokens[i];
 
         switch(t.type){
         case TOK_NUM:
+            if(next == EXPECT_OPERATOR){
+                return (Result){0,MISSING_OPERAND};
+            }
             push_num(&num_stack,t.value);
+            next = EXPECT_OPERATOR;
             break;
         case TOK_LPARAN:
             push_op(&op_stack,t.type);
@@ -74,8 +92,14 @@ double parser(const char *exp){
                 }else{
                     double num2 = pop_num(&num_stack);
                     double num1 = pop_num(&num_stack);
+                    if(op==TOK_SLASH && num2==0){
+                        return (Result){0,DIVISION_BY_ZERO};
+                    }
                     push_num(&num_stack,apply_op(num1,num2,op));
                 }
+            }
+            if(op_stack.top==-1){
+                return (Result){0,MISMATCHED_PARAN};
             }
             pop_op(&op_stack);
             break;
@@ -85,6 +109,9 @@ double parser(const char *exp){
         case TOK_STAR :
         case TOK_SLASH :
         case TOK_POWER :
+            if(next == EXPECT_OPERAND && t.type!=TOK_UNARY_MINUS){
+                return (Result){0,MISSING_OPERAND};
+            }
             while(op_stack.top!=-1 && peek_op(&op_stack)!=TOK_LPARAN){
                 int top_prec = precedence(peek_op(&op_stack));
                 int curr_prec = precedence(t.type);
@@ -97,6 +124,9 @@ double parser(const char *exp){
                     }else{
                         double num2 = pop_num(&num_stack);
                         double num1 = pop_num(&num_stack);
+                        if(op==TOK_SLASH && num2==0){
+                            return (Result){0,DIVISION_BY_ZERO};
+                        }
                         push_num(&num_stack,apply_op(num1,num2,op));
                     }
                 }
@@ -104,20 +134,27 @@ double parser(const char *exp){
                     break;
                 }
             }
-             push_op(&op_stack,t.type);
+            push_op(&op_stack,t.type);
+            next = EXPECT_OPERAND;
              break;
         }
     }
     while(op_stack.top!=-1){
         Tokentype op = pop_op(&op_stack);
+        if(op==TOK_LPARAN){
+            return (Result){0,MISMATCHED_PARAN};
+        }
         if(op==TOK_UNARY_MINUS){
             double a = pop_num(&num_stack);
             push_num(&num_stack,-a);
         }else{
             double num2 = pop_num(&num_stack);
             double num1 = pop_num(&num_stack);
+            if(op==TOK_SLASH && num2==0){
+                return (Result){0,DIVISION_BY_ZERO};
+            }
             push_num(&num_stack,apply_op(num1,num2,op));
         }
     }
-    return pop_num(&num_stack);
+    return (Result){pop_num(&num_stack),NO_ERROR};
 }
