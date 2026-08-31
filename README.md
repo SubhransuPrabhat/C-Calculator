@@ -38,14 +38,15 @@ This puts `libcalculator.so` and `calculator.h` on your system so other programs
 Build the example:
 
 ```bash
-gcc -Iinclude Example/main.c -Lbuild -lcalculator -o Example/calc
-./Example/calc '5+3*(4/2)'
+gcc -Iinclude Example/main.c -Lbuild -lcalculator -o Example/calculator
+./Example/calculator
 ```
 
-Output:
+Or if you havent installed library:
 
-```
-11.000000
+```bash
+gcc -Include Example/main.c src/*.c -lm -o calculator
+./calculator
 ```
 
 > Expressions should be quoted when using shell characters such as `*`, `(` and `)`.
