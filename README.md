@@ -49,8 +49,6 @@ gcc -Include Example/main.c src/*.c -lm -o calculator
 ./calculator
 ```
 
-> Expressions should be quoted when using shell characters such as `*`, `(` and `)`.
-
 ## Structure
 
 ```
