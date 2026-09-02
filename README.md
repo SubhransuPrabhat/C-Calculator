@@ -45,7 +45,7 @@ gcc -Iinclude Example/main.c -Lbuild -lcalculator -o Example/calculator
 Or if you havent installed library:
 
 ```bash
-gcc -Include Example/main.c src/*.c -lm -o calculator
+gcc -Iinclude Example/main.c src/*.c -lm -o calculator
 ./calculator
 ```
 
