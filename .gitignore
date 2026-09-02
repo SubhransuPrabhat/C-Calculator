@@ -1,5 +1,5 @@
 output
 build/
-calc
+calculator
 *.o
 *.so
